@@ -1,6 +1,3 @@
-const imgXLine1 = 'http://localhost:3845/assets/d42dfc7f3c90f1467441b2ba73a986d9568ea272.svg';
-const imgXLine2 = 'http://localhost:3845/assets/047e28b8f02421022c21cdbce31cf65739c094d1.svg';
-
 interface SelectedFiltersAProps {
   groupLabel?: string;
   selectedValues: string[];
@@ -73,18 +70,9 @@ const SelectedFiltersA = ({
           padding: 0,
         }}
       >
-        <div style={{ position: 'relative', width: 16, height: 16, overflow: 'clip' }}>
-          <div style={{ position: 'absolute', inset: '25%' }}>
-            <div style={{ position: 'absolute', inset: '-9.38%' }}>
-              <img alt="" src={imgXLine1} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
-            </div>
-          </div>
-          <div style={{ position: 'absolute', inset: '25%' }}>
-            <div style={{ position: 'absolute', inset: '-9.38%' }}>
-              <img alt="" src={imgXLine2} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
-            </div>
-          </div>
-        </div>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 4L4 12M4 4L12 12" stroke="#60758f" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
       </button>
     </div>
   );

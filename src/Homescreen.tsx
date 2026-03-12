@@ -417,7 +417,11 @@ const Homescreen = ({ FilterView = DefaultFilterView }: HomescreenProps) => {
             subtitle="Available balance"
           />
           <AccountCard
-            icon={<IconReceipt size={40} />}
+            icon={
+              <div style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <IconReceipt size={24} />
+              </div>
+            }
             title="My Claims"
             balance=""
             subtitle=""
