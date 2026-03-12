@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(lsof -ti :3333)",
+      "Bash(xargs kill -9)",
+      "Bash(curl -s http://127.0.0.1:3333/mcp)",
+      "Bash(curl -s -N --max-time 3 http://127.0.0.1:3333/sse)",
+      "Bash(node --version)",
+      "Bash(launchctl unload ~/Library/LaunchAgents/com.figma.mcp.plist)",
+      "Bash(launchctl load ~/Library/LaunchAgents/com.figma.mcp.plist)",
+      "Bash(npx figma-developer-mcp --version)",
+      "Bash(npm show figma-developer-mcp version)",
+      "Bash(curl -s http://127.0.0.1:3845/mcp)",
+      "Bash(curl -s http://127.0.0.1:3845/sse)",
+      "Bash(curl -s --max-time 3 http://127.0.0.1:3845/mcp)",
+      "mcp__figma__get_design_context",
+      "mcp__figma__get_screenshot"
+    ]
+  }
+}
