@@ -517,7 +517,7 @@ const Homescreen = ({ FilterView = DefaultFilterView }: HomescreenProps) => {
                   height: 40,
                 }}
               >
-                <IconFilter size={24} selected={hasActiveFilters} />
+                <IconFilter size={24} color="#0f2b4d" selected={hasActiveFilters} />
               </button>
             </div>
           </div>

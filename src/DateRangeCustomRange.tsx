@@ -74,7 +74,7 @@ const DateRangeCustomRange = ({
   // Generate months from Jan 2025 to Dec 2026
   const generateMonths = () => {
     const months: { year: number; month: number }[] = [];
-    for (let year = 2025; year <= 2026; year++) {
+    for (let year = 2020; year <= 2026; year++) {
       for (let month = 0; month < 12; month++) {
         months.push({ year, month });
       }
