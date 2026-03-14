@@ -286,6 +286,8 @@ export default function FilterView({
     customDateRange: initialFilters?.customDateRange,
   });
 
+  const committedRef = useRef(filters);
+
   const [expanded, setExpanded] = useState({
     benefit: true,
     type: true,
@@ -296,6 +298,31 @@ export default function FilterView({
   const [showCustomRangeSheet, setShowCustomRangeSheet] = useState(false);
   const [showBenefitSheet, setShowBenefitSheet] = useState(false);
   const [pendingBenefitSelections, setPendingBenefitSelections] = useState<BenefitSelections>(DEFAULT_BENEFIT_SELECTIONS);
+
+  const hasChanges = JSON.stringify(filters) !== JSON.stringify(committedRef.current);
+
+  const hasActiveFilters =
+    Object.values(filters.benefitSelections).some(Boolean) ||
+    filters.moneyInSelected ||
+    filters.moneyOutSelected ||
+    filters.clearedSelected ||
+    filters.pendingSelected ||
+    !!filters.dateRangeOption;
+
+  const handleClearAll = () => {
+    const clearedFilters = {
+      benefitSelections: DEFAULT_BENEFIT_SELECTIONS,
+      moneyInSelected: false,
+      moneyOutSelected: false,
+      clearedSelected: false,
+      pendingSelected: false,
+      dateRangeOption: null as DateRangeOption,
+      customDateRange: undefined,
+    };
+    setFilters(clearedFilters);
+    onApplyFilter?.(clearedFilters);
+    onBack?.();
+  };
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -526,9 +553,12 @@ export default function FilterView({
       </div>
 
       <ButtonBar
-        buttonCount={1}
+        buttonCount={hasActiveFilters ? 2 : 1}
         primaryLabel="Apply Filter"
+        secondaryLabel="Clear All"
         onPrimaryClick={() => onApplyFilter?.(filters)}
+        onSecondaryClick={handleClearAll}
+        primaryDisabled={hasActiveFilters && !hasChanges}
       />
 
       {showBenefitSheet && (

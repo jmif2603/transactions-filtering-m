@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import StatusBarIphone from './components/StatusBarIphone';
 import TextField from './components/TextField';
 import ButtonBar from './components/ButtonBar';
@@ -71,6 +71,8 @@ export default function FilterView({
     dateRangeOption: initialFilters?.dateRangeOption ?? null,
     customDateRange: initialFilters?.customDateRange,
   });
+
+  const committedRef = useRef(filters);
 
   // Bottom sheet visibility
   const [showStatusSheet, setShowStatusSheet] = useState(false);
@@ -152,6 +154,31 @@ export default function FilterView({
     if (selected.length === 0) return 'All Status';
     if (selected.length <= 2) return selected.join(', ');
     return `${selected.slice(0, 2).join(', ')}, +${selected.length - 2}`;
+  };
+
+  const hasChanges = JSON.stringify(filters) !== JSON.stringify(committedRef.current);
+
+  const hasActiveFilters =
+    Object.values(filters.benefitSelections).some(Boolean) ||
+    filters.moneyInSelected ||
+    filters.moneyOutSelected ||
+    filters.clearedSelected ||
+    filters.pendingSelected ||
+    !!filters.dateRangeOption;
+
+  const handleClearAll = () => {
+    const clearedFilters = {
+      benefitSelections: DEFAULT_BENEFIT_SELECTIONS,
+      moneyInSelected: false,
+      moneyOutSelected: false,
+      clearedSelected: false,
+      pendingSelected: false,
+      dateRangeOption: null as DateRangeOption,
+      customDateRange: undefined,
+    };
+    setFilters(clearedFilters);
+    onApplyFilter?.(clearedFilters);
+    onBack?.();
   };
 
   const handleApplyFilter = () => {
@@ -394,9 +421,12 @@ export default function FilterView({
 
       {/* Bottom Button Bar */}
       <ButtonBar
-        buttonCount={1}
+        buttonCount={hasActiveFilters ? 2 : 1}
         primaryLabel="Apply Filter"
+        secondaryLabel="Clear All"
         onPrimaryClick={handleApplyFilter}
+        onSecondaryClick={handleClearAll}
+        primaryDisabled={hasActiveFilters && !hasChanges}
       />
 
       {/* Status Bottom Sheet */}
