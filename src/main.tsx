@@ -12,7 +12,7 @@ createRoot(document.getElementById('root')!).render(
         <Homescreen FilterView={FilterViewA} />
       </div>
       <div style={{ width: 393, flexShrink: 0 }}>
-        <Homescreen FilterView={FilterViewB} />
+        <Homescreen FilterView={FilterViewB} filterChipVariant="B" />
       </div>
     </div>
   </StrictMode>,

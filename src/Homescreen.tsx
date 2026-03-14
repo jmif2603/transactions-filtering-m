@@ -8,7 +8,8 @@ import IconDollarSign from './components/Icons/IconDollarSign';
 import IconBarChart from './components/Icons/IconBarChart';
 import IconFilter from './components/Icons/IconFilter';
 import IconSearch from './components/Icons/IconSearch';
-import SelectedFiltersA from './components/SelectedFiltersA';
+import SelectedFilterA from './components/SelectedFilterA';
+import SelectedFilterB from './components/SelectedFilterB';
 import BenefitIconDuo from './components/BenefitIconDuo';
 import IconReceipt from './components/Icons/IconReceipt';
 import DefaultFilterView, { DEFAULT_BENEFIT_SELECTIONS } from './FilterViewA';
@@ -126,9 +127,10 @@ const AccountCard = ({
 
 interface HomescreenProps {
   FilterView?: React.ComponentType<FilterViewProps>;
+  filterChipVariant?: 'A' | 'B';
 }
 
-const Homescreen = ({ FilterView = DefaultFilterView }: HomescreenProps) => {
+const Homescreen = ({ FilterView = DefaultFilterView, filterChipVariant = 'A' }: HomescreenProps) => {
   const [activeTab, setActiveTab] = useState<
     'wallet' | 'cards' | 'invest' | 'account' | 'claims' | 'resources'
   >('wallet');
@@ -403,28 +405,52 @@ const Homescreen = ({ FilterView = DefaultFilterView }: HomescreenProps) => {
             return (
               <div style={{ marginBottom: 16, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {selectedBenefits.length > 0 && (
-                  <SelectedFiltersA
-                    groupLabel="Benefit"
-                    selectedValues={selectedBenefits}
-                    onClear={() => setAppliedFilters((prev) => prev && { ...prev, benefitSelections: DEFAULT_BENEFIT_SELECTIONS })}
-                  />
+                  filterChipVariant === 'B' ? (
+                    <SelectedFilterB
+                      groupLabel="Benefit"
+                      count={selectedBenefits.length}
+                      onClear={() => setAppliedFilters((prev) => prev && { ...prev, benefitSelections: DEFAULT_BENEFIT_SELECTIONS })}
+                    />
+                  ) : (
+                    <SelectedFilterA
+                      groupLabel="Benefit"
+                      selectedValues={selectedBenefits}
+                      onClear={() => setAppliedFilters((prev) => prev && { ...prev, benefitSelections: DEFAULT_BENEFIT_SELECTIONS })}
+                    />
+                  )
                 )}
                 {selectedTypes.length > 0 && (
-                  <SelectedFiltersA
-                    groupLabel="Type"
-                    selectedValues={selectedTypes}
-                    onClear={() => setAppliedFilters((prev) => prev && { ...prev, moneyInSelected: false, moneyOutSelected: false })}
-                  />
+                  filterChipVariant === 'B' ? (
+                    <SelectedFilterB
+                      groupLabel="Type"
+                      count={selectedTypes.length}
+                      onClear={() => setAppliedFilters((prev) => prev && { ...prev, moneyInSelected: false, moneyOutSelected: false })}
+                    />
+                  ) : (
+                    <SelectedFilterA
+                      groupLabel="Type"
+                      selectedValues={selectedTypes}
+                      onClear={() => setAppliedFilters((prev) => prev && { ...prev, moneyInSelected: false, moneyOutSelected: false })}
+                    />
+                  )
                 )}
                 {selectedStatuses.length > 0 && (
-                  <SelectedFiltersA
-                    groupLabel="Status"
-                    selectedValues={selectedStatuses}
-                    onClear={() => setAppliedFilters((prev) => prev && { ...prev, clearedSelected: false, pendingSelected: false })}
-                  />
+                  filterChipVariant === 'B' ? (
+                    <SelectedFilterB
+                      groupLabel="Status"
+                      count={selectedStatuses.length}
+                      onClear={() => setAppliedFilters((prev) => prev && { ...prev, clearedSelected: false, pendingSelected: false })}
+                    />
+                  ) : (
+                    <SelectedFilterA
+                      groupLabel="Status"
+                      selectedValues={selectedStatuses}
+                      onClear={() => setAppliedFilters((prev) => prev && { ...prev, clearedSelected: false, pendingSelected: false })}
+                    />
+                  )
                 )}
                 {dateLabel && (
-                  <SelectedFiltersA
+                  <SelectedFilterA
                     groupLabel="Date"
                     selectedValues={[dateLabel]}
                     onClear={() => setAppliedFilters((prev) => prev && { ...prev, dateRangeOption: null, customDateRange: undefined })}

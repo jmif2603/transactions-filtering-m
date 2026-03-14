@@ -1,14 +1,14 @@
-interface SelectedFiltersAProps {
+interface SelectedFilterAProps {
   groupLabel?: string;
   selectedValues: string[];
   onClear?: () => void;
 }
 
-const SelectedFiltersA = ({
+const SelectedFilterA = ({
   groupLabel = 'Benefit',
   selectedValues,
   onClear,
-}: SelectedFiltersAProps) => {
+}: SelectedFilterAProps) => {
   const displayText = (() => {
     if (selectedValues.length === 0) return '';
     if (selectedValues.length === 1) return selectedValues[0];
@@ -78,4 +78,4 @@ const SelectedFiltersA = ({
   );
 };
 
-export default SelectedFiltersA;
+export default SelectedFilterA;
