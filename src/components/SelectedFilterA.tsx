@@ -2,12 +2,14 @@ interface SelectedFilterAProps {
   groupLabel?: string;
   selectedValues: string[];
   onClear?: () => void;
+  backgroundColor?: string;
 }
 
 const SelectedFilterA = ({
   groupLabel = 'Benefit',
   selectedValues,
   onClear,
+  backgroundColor = '#f9f7f6',
 }: SelectedFilterAProps) => {
   const displayText = (() => {
     if (selectedValues.length === 0) return '';
@@ -23,7 +25,7 @@ const SelectedFilterA = ({
         display: 'inline-flex',
         alignItems: 'center',
         gap: 4,
-        backgroundColor: '#f9f7f6',
+        backgroundColor,
         border: '1px solid #cfd6de',
         borderRadius: 6,
       }}

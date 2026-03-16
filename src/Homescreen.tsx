@@ -187,12 +187,34 @@ const Homescreen = ({ FilterView = DefaultFilterView, filterChipVariant = 'A' }:
   const anyTypeFilter = appliedFilters ? (appliedFilters.moneyInSelected || appliedFilters.moneyOutSelected) : false;
   const anyStatusFilter = appliedFilters ? (appliedFilters.clearedSelected || appliedFilters.pendingSelected) : false;
 
-  const filterTx = (tx: { benefit?: string; type?: string; direction?: string }) => {
+  const filterTx = (tx: { benefit?: string; type?: string; direction?: string; date?: string }) => {
     if (anyBenefitFilter && !selectedBenefitTypes.includes(tx.benefit ?? '')) return false;
     if (anyTypeFilter) {
       if (appliedFilters?.moneyInSelected && tx.direction === 'MoneyIn') return true;
       if (appliedFilters?.moneyOutSelected && tx.direction === 'MoneyOut') return true;
       return false;
+    }
+    if (appliedFilters?.dateRangeOption && tx.date) {
+      const txDate = new Date(tx.date);
+      const now = new Date();
+      if (appliedFilters.dateRangeOption === 'custom') {
+        const { startDate, endDate } = appliedFilters.customDateRange ?? {};
+        if (startDate && endDate) {
+          const end = new Date(endDate);
+          end.setHours(23, 59, 59, 999);
+          if (txDate < startDate || txDate > end) return false;
+        }
+      } else {
+        const msAgo: Record<string, number> = {
+          last24hours: 24 * 60 * 60 * 1000,
+          last3days: 3 * 24 * 60 * 60 * 1000,
+          last7days: 7 * 24 * 60 * 60 * 1000,
+          last14days: 14 * 24 * 60 * 60 * 1000,
+          last30days: 30 * 24 * 60 * 60 * 1000,
+        };
+        const cutoff = new Date(now.getTime() - msAgo[appliedFilters.dateRangeOption]);
+        if (txDate < cutoff) return false;
+      }
     }
     return true;
   };
@@ -256,7 +278,7 @@ const Homescreen = ({ FilterView = DefaultFilterView, filterChipVariant = 'A' }:
         style={{
           flex: 1,
           overflowY: 'auto',
-          paddingBottom: 100,
+          paddingBottom: 146,
           cursor: isDragging ? 'grabbing' : 'grab',
         }}
       >
@@ -454,11 +476,24 @@ const Homescreen = ({ FilterView = DefaultFilterView, filterChipVariant = 'A' }:
                     groupLabel="Date"
                     selectedValues={[dateLabel]}
                     onClear={() => setAppliedFilters((prev) => prev && { ...prev, dateRangeOption: null, customDateRange: undefined })}
+                    backgroundColor={filterChipVariant === 'B' ? 'white' : undefined}
                   />
                 )}
               </div>
             );
           })()}
+
+          {/* Empty state */}
+          {filteredCleared.length === 0 && filteredPending.length === 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px 0' }}>
+              <p style={{ fontFamily: 'Roboto, sans-serif', fontSize: 20, fontWeight: 400, color: '#60758f', letterSpacing: -0.4, margin: '0 0 4px 0' }}>
+                Nothing... yet.
+              </p>
+              <p style={{ fontFamily: 'Roboto, sans-serif', fontSize: 15, color: '#b8c0ca', letterSpacing: -0.15, margin: 0, textAlign: 'center' }}>
+                No transaction matches your criteria.<br />Update filter and try again.
+              </p>
+            </div>
+          )}
 
           {/* Cleared */}
           {showClearedSection && filteredCleared.length > 0 && (
