@@ -90,8 +90,8 @@ export default function ButtonBar({
 
       {/* iOS Home Indicator */}
       {showHomeIndicator && (
-        <div className="bg-white h-[34px] w-full flex items-end justify-center pb-2">
-          <div className="bg-black h-[5px] w-[134px] rounded-full" />
+        <div className="bg-white h-8.5 w-full flex items-end justify-center pb-2">
+          <div className="bg-black h-1.25 w-33.5 rounded-full" />
         </div>
       )}
     </div>
