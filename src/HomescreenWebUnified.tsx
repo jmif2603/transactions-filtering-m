@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import healthWalletLogoSvg from './assets/HealthWalletLogo.svg';
 import SideNav, { healthWalletNavItemsEn, healthWalletNavItemsEs } from './components/SideNav';
 import WalletTransactionListItemWeb from './components/WalletTransactionListItemWeb';
 import Button from './components/Button';
 import BenefitIconDuo from './components/BenefitIconDuo';
-import { IconArrowRight, IconChevronRight, IconPlus, IconHelpCircle } from './components/icons';
+import { IconArrowRight, IconChevronRight, IconPlus, IconHelpCircle, IconFilter, IconCalendar, IconLogIn, IconLogOut, IconCheckCircle, IconWaiting } from './components/icons';
+import Input from './components/Input';
+import Chip from './components/Chip';
 import CommsIcon from './components/commsIcon';
 import { clearedTransactions, pendingTransactions } from './data/transactions';
 import type { Transaction } from './data/transactions';
@@ -197,6 +199,172 @@ type WalletBenefitType = 'HSA_FSA' | 'HRA' | 'DCFSA' | 'LPFSA' | 'RemoteWork' | 
 
 const toBenefit = (b: Transaction['benefit']): WalletBenefitType => b;
 
+// ============ FilterPanel ============
+
+const BENEFIT_OPTIONS = ['Health Savings', 'HRA', 'DCFSA', 'LPFSA', 'Remote Work', 'Transit', 'LSA', 'Parking', 'Rewards'];
+const TYPE_OPTIONS = ['Money In', 'Money Out'];
+const STATUS_OPTIONS = ['Cleared', 'Pending'];
+const DATE_RANGE_OPTIONS = ['Last 24 Hours', 'Last 3 days', 'Last 7 days', 'Last 14 days', 'Last 30 days'];
+
+const typeIcons: Record<string, React.ReactNode> = {
+  'Money In': <IconLogIn size={16} />,
+  'Money Out': <IconLogOut size={16} />,
+};
+
+const statusIcons: Record<string, React.ReactNode> = {
+  'Cleared': <IconCheckCircle size={16} />,
+  'Pending': <IconWaiting size={16} />,
+};
+
+interface FilterSectionProps {
+  title: string;
+  options: string[];
+  selected: string[];
+  onToggle: (option: string) => void;
+  onSelectAll: () => void;
+  icons?: Record<string, React.ReactNode>;
+  borderBottom?: boolean;
+}
+
+const FilterSection = ({ title, options, selected, onToggle, onSelectAll, icons, borderBottom = true }: FilterSectionProps) => (
+  <div
+    style={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 8,
+      paddingBottom: borderBottom ? 16 : 8,
+      borderBottom: borderBottom ? '1px solid #f7f3f2' : 'none',
+    }}
+  >
+    {/* Section header */}
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 8, paddingLeft: 8, paddingRight: 8 }}>
+      <span style={{ fontFamily: 'Roboto, sans-serif', fontSize: 15, fontWeight: 500, color: colors.textDark, letterSpacing: '-0.15px' }}>
+        {title}
+      </span>
+      <button
+        onClick={onSelectAll}
+        style={{
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          fontFamily: 'Roboto, sans-serif',
+          fontSize: 13,
+          color: colors.primary,
+          padding: '4px 12px',
+        }}
+      >
+        Select All
+      </button>
+    </div>
+
+    {/* Chips */}
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, paddingLeft: 8 }}>
+      {options.map(option => (
+        <Chip
+          key={option}
+          label={option}
+          size="Small"
+          selected={selected.includes(option)}
+          onClick={() => onToggle(option)}
+          leftIcon={!!icons?.[option]}
+          icon={icons?.[option] ?? null}
+        />
+      ))}
+    </div>
+  </div>
+);
+
+interface FilterPanelProps {
+  selectedBenefits: string[];
+  setSelectedBenefits: (v: string[]) => void;
+  selectedTypes: string[];
+  setSelectedTypes: (v: string[]) => void;
+  selectedStatuses: string[];
+  setSelectedStatuses: (v: string[]) => void;
+  selectedDateRange: string | null;
+  setSelectedDateRange: (v: string | null) => void;
+}
+
+const FilterPanel = ({
+  selectedBenefits, setSelectedBenefits,
+  selectedTypes, setSelectedTypes,
+  selectedStatuses, setSelectedStatuses,
+  selectedDateRange, setSelectedDateRange,
+}: FilterPanelProps) => {
+  const toggle = (arr: string[], item: string, set: (v: string[]) => void) =>
+    set(arr.includes(item) ? arr.filter(i => i !== item) : [...arr, item]);
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: 44,
+        right: 0,
+        width: 321,
+        backgroundColor: colors.white,
+        border: `1px solid ${colors.borderDark}`,
+        borderRadius: 8,
+        padding: 8,
+        boxShadow: '0px 8px 20px 0px rgba(99,99,102,0.1)',
+        zIndex: 100,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 8,
+      }}
+    >
+      <FilterSection
+        title="Benefit Account"
+        options={BENEFIT_OPTIONS}
+        selected={selectedBenefits}
+        onToggle={opt => toggle(selectedBenefits, opt, setSelectedBenefits)}
+        onSelectAll={() => setSelectedBenefits(selectedBenefits.length === BENEFIT_OPTIONS.length ? [] : [...BENEFIT_OPTIONS])}
+      />
+      <FilterSection
+        title="Type"
+        options={TYPE_OPTIONS}
+        selected={selectedTypes}
+        onToggle={opt => toggle(selectedTypes, opt, setSelectedTypes)}
+        onSelectAll={() => setSelectedTypes(selectedTypes.length === TYPE_OPTIONS.length ? [] : [...TYPE_OPTIONS])}
+        icons={typeIcons}
+      />
+      <FilterSection
+        title="Status"
+        options={STATUS_OPTIONS}
+        selected={selectedStatuses}
+        onToggle={opt => toggle(selectedStatuses, opt, setSelectedStatuses)}
+        onSelectAll={() => setSelectedStatuses(selectedStatuses.length === STATUS_OPTIONS.length ? [] : [...STATUS_OPTIONS])}
+        icons={statusIcons}
+      />
+
+      {/* Date Range — no bottom border, no Select All */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingBottom: 8 }}>
+        <div style={{ paddingTop: 8, paddingLeft: 8 }}>
+          <span style={{ fontFamily: 'Roboto, sans-serif', fontSize: 15, fontWeight: 500, color: colors.textDark, letterSpacing: '-0.15px' }}>
+            Date Range
+          </span>
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, paddingLeft: 8 }}>
+          {DATE_RANGE_OPTIONS.map(opt => (
+            <Chip
+              key={opt}
+              label={opt}
+              size="Small"
+              selected={selectedDateRange === opt}
+              onClick={() => setSelectedDateRange(selectedDateRange === opt ? null : opt)}
+            />
+          ))}
+        </div>
+        <div style={{ paddingLeft: 8, paddingRight: 8 }}>
+          <Input
+            startIcon={<IconCalendar size={16} color={colors.textMuted} />}
+            placeholder="_ _/_ _/_ _ _ _"
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ============ HomescreenWebUnified ============
 
 interface HomescreenWebUnifiedProps {
@@ -207,6 +375,22 @@ const HomescreenWebUnified = ({ userName = 'Frank' }: HomescreenWebUnifiedProps)
   const [locale, setLocale] = useState<'en' | 'es'>('en');
   const [activeNav, setActiveNav] = useState('Wallet');
   const [notifPage, setNotifPage] = useState(1);
+  const [filterPanelOpen, setFilterPanelOpen] = useState(false);
+  const [selectedBenefits, setSelectedBenefits] = useState<string[]>([]);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [selectedDateRange, setSelectedDateRange] = useState<string | null>(null);
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
+        setFilterPanelOpen(false);
+      }
+    };
+    if (filterPanelOpen) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [filterPanelOpen]);
   const notifTotal = 2;
 
   const navItems = locale === 'en' ? healthWalletNavItemsEn : healthWalletNavItemsEs;
@@ -348,25 +532,40 @@ const HomescreenWebUnified = ({ userName = 'Frank' }: HomescreenWebUnifiedProps)
             >
               Transactions
             </h2>
-            <button
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                backgroundColor: colors.white,
-                border: `1px solid ${colors.borderDark}`,
-                borderRadius: 6,
-                padding: '0 12px',
-                height: 40,
-                cursor: 'pointer',
-                fontFamily: 'Roboto, sans-serif',
-                fontSize: 13,
-                color: colors.textDark,
-              }}
-            >
-              Account Type
-              <ChevronDown />
-            </button>
+            <div ref={filterRef} style={{ position: 'relative' }}>
+              <button
+                onClick={() => setFilterPanelOpen(o => !o)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  backgroundColor: colors.white,
+                  border: `1px solid ${colors.borderDark}`,
+                  borderRadius: 6,
+                  padding: '8px 12px',
+                  cursor: 'pointer',
+                  fontFamily: 'Roboto, sans-serif',
+                  fontSize: 15,
+                  color: colors.textDark,
+                  letterSpacing: '-0.15px',
+                }}
+              >
+                Filters
+                <IconFilter size={16} color={colors.textDark} />
+              </button>
+              {filterPanelOpen && (
+                <FilterPanel
+                  selectedBenefits={selectedBenefits}
+                  setSelectedBenefits={setSelectedBenefits}
+                  selectedTypes={selectedTypes}
+                  setSelectedTypes={setSelectedTypes}
+                  selectedStatuses={selectedStatuses}
+                  setSelectedStatuses={setSelectedStatuses}
+                  selectedDateRange={selectedDateRange}
+                  setSelectedDateRange={setSelectedDateRange}
+                />
+              )}
+            </div>
           </div>
 
           {/* Pending */}

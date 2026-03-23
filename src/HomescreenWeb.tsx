@@ -629,7 +629,7 @@ const HomescreenWeb = ({ userName = 'Frank' }: HomescreenWebProps) => {
       />
 
       {/* Main content */}
-      <main style={{ flex: 1, overflowY: 'auto', padding: 32, minWidth: 0 }}>
+      <main className="hide-scrollbar" style={{ flex: 1, overflowY: 'auto', padding: 32, minWidth: 0 }}>
 
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>

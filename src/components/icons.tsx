@@ -13,6 +13,10 @@ import settingsSvg from '../assets/icon-settings.svg';
 import organizationsSvg from '../assets/icon-organizations.svg';
 import bankingSvg from '../assets/icon-banking.svg';
 import identitySvg from '../assets/icon-identity.svg';
+import iconLogInSvg from '../assets/IconLogIn.svg';
+import iconLogOutSvg from '../assets/IconLogOut.svg';
+import iconCheckCircleSvg from '../assets/IconCheckCircle.svg';
+import iconWaitingSvg from '../assets/IconWaiting.svg';
 
 // ============ Shared prop types ============
 
@@ -234,6 +238,22 @@ export const IconCalendar = ({ size = 16, color = '#60758f' }: IconProps) => (
 interface IconFilterProps extends IconProps {
   selected?: boolean;
 }
+
+export const IconLogIn = ({ size = 16 }: IconAssetProps) => (
+  <img src={iconLogInSvg} width={size} height={size} alt="log in" />
+);
+
+export const IconLogOut = ({ size = 16 }: IconAssetProps) => (
+  <img src={iconLogOutSvg} width={size} height={size} alt="log out" />
+);
+
+export const IconCheckCircle = ({ size = 16 }: IconAssetProps) => (
+  <img src={iconCheckCircleSvg} width={size} height={size} alt="check circle" />
+);
+
+export const IconWaiting = ({ size = 24 }: IconAssetProps) => (
+  <img src={iconWaitingSvg} width={size} height={size} alt="waiting" />
+);
 
 export const IconFilter = ({ size = 24, color = '#60758F', selected = false }: IconFilterProps) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
