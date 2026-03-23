@@ -7,6 +7,7 @@ import BenefitIconDuo from './components/BenefitIconDuo';
 import { IconArrowRight, IconChevronRight, IconPlus, IconHelpCircle, IconFilter, IconCalendar, IconLogIn, IconLogOut, IconCheckCircle, IconWaiting } from './components/icons';
 import Input from './components/Input';
 import Chip from './components/Chip';
+import DateRangeCustomRange from './DateRangeCustomRange';
 import CommsIcon from './components/commsIcon';
 import { clearedTransactions, pendingTransactions } from './data/transactions';
 import type { Transaction } from './data/transactions';
@@ -196,6 +197,18 @@ const toBenefit = (b: Transaction['benefit']): WalletBenefitType => b;
 
 // ============ FilterPanel ============
 
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+const formatDateRange = (start: Date, end: Date): string => {
+  const sy = start.getFullYear(), ey = end.getFullYear();
+  const sm = start.getMonth(), em = end.getMonth();
+  const sd = start.getDate(), ed = end.getDate();
+  const sameYear = sy === ey;
+  const startStr = `${MONTHS_SHORT[sm]} ${sd}${sameYear ? '' : `, ${sy}`}`;
+  const endStr = `${MONTHS_SHORT[em]} ${ed}, ${ey}`;
+  return `${startStr} – ${endStr}`;
+};
+
 const BENEFIT_OPTIONS = ['Health Savings', 'HRA', 'DCFSA', 'LPFSA', 'Remote Work', 'Transit', 'LSA', 'Parking', 'Rewards'];
 const TYPE_OPTIONS = ['Money In', 'Money Out'];
 const STATUS_OPTIONS = ['Cleared', 'Pending'];
@@ -275,6 +288,11 @@ const FilterSection = ({ title, options, selected, onToggle, onSelectAll, onClea
   </div>
 );
 
+interface CustomDateRange {
+  startDate: Date | null;
+  endDate: Date | null;
+}
+
 interface FilterPanelProps {
   selectedBenefits: string[];
   setSelectedBenefits: (v: string[]) => void;
@@ -284,6 +302,8 @@ interface FilterPanelProps {
   setSelectedStatuses: (v: string[]) => void;
   selectedDateRange: string | null;
   setSelectedDateRange: (v: string | null) => void;
+  customDateRange: CustomDateRange;
+  setCustomDateRange: (v: CustomDateRange) => void;
 }
 
 const FilterPanel = ({
@@ -291,9 +311,20 @@ const FilterPanel = ({
   selectedTypes, setSelectedTypes,
   selectedStatuses, setSelectedStatuses,
   selectedDateRange, setSelectedDateRange,
+  customDateRange, setCustomDateRange,
 }: FilterPanelProps) => {
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [pendingRange, setPendingRange] = useState<CustomDateRange>({ startDate: null, endDate: null });
+
   const toggle = (arr: string[], item: string, set: (v: string[]) => void) =>
     set(arr.includes(item) ? arr.filter(i => i !== item) : [...arr, item]);
+
+  const openDatePicker = () => {
+    setPendingRange(customDateRange);
+    setShowDatePicker(true);
+  };
+
+  const hasCustomRange = !!(customDateRange.startDate && customDateRange.endDate);
 
   return (
     <div
@@ -342,10 +373,18 @@ const FilterPanel = ({
 
       {/* Date Range — no bottom border, no Select All */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingBottom: 8 }}>
-        <div style={{ paddingTop: 8, paddingLeft: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 8, paddingLeft: 8, minHeight: 36, boxSizing: 'border-box' }}>
           <span style={{ fontFamily: 'Roboto, sans-serif', fontSize: 15, fontWeight: 500, color: colors.textDark, letterSpacing: '-0.15px' }}>
             Date Range
           </span>
+          {(selectedDateRange !== null || hasCustomRange) && (
+            <button
+              onClick={() => { setSelectedDateRange(null); setCustomDateRange({ startDate: null, endDate: null }); }}
+              style={filterActionBtnStyle}
+            >
+              Clear All
+            </button>
+          )}
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, paddingLeft: 8 }}>
           {DATE_RANGE_OPTIONS.map(opt => (
@@ -354,17 +393,61 @@ const FilterPanel = ({
               label={opt}
               size="Small"
               selected={selectedDateRange === opt}
-              onClick={() => setSelectedDateRange(selectedDateRange === opt ? null : opt)}
+              onClick={() => {
+                setSelectedDateRange(selectedDateRange === opt ? null : opt);
+                setCustomDateRange({ startDate: null, endDate: null });
+              }}
             />
           ))}
         </div>
-        <div style={{ paddingLeft: 8, paddingRight: 8 }}>
+        <div style={{ paddingLeft: 8, paddingRight: 8 }} onClick={openDatePicker}>
           <Input
+            readOnly
             startIcon={<IconCalendar size={16} color={colors.textMuted} />}
             placeholder="_ _/_ _/_ _ _ _"
+            value={hasCustomRange ? formatDateRange(customDateRange.startDate!, customDateRange.endDate!) : ''}
+            containerClassName="cursor-pointer"
           />
         </div>
       </div>
+
+      {/* Date picker — floats to the left of the panel */}
+      {showDatePicker && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 'calc(100% + 8px)',
+            width: 360,
+            height: 540,
+            borderRadius: 6,
+            overflow: 'hidden',
+            boxShadow: '0px 8px 20px 0px rgba(99,99,102,0.1)',
+            zIndex: 101,
+          }}
+        >
+          <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+            <DateRangeCustomRange
+              isVisible={true}
+              hideOverlay
+              fullHeight
+              hideDragHandle
+              simpleButton
+              disableAutoScroll
+              headerPaddingTop={24}
+              initialStartDate={pendingRange.startDate}
+              initialEndDate={pendingRange.endDate}
+              onSelectDates={(startDate, endDate) => setPendingRange({ startDate, endDate })}
+              onDismiss={() => setShowDatePicker(false)}
+              onSave={() => {
+                setCustomDateRange(pendingRange);
+                setSelectedDateRange(null);
+                setShowDatePicker(false);
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -384,6 +467,7 @@ const HomescreenWebUnified = ({ userName = 'Frank' }: HomescreenWebUnifiedProps)
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [selectedDateRange, setSelectedDateRange] = useState<string | null>(null);
+  const [customDateRange, setCustomDateRange] = useState<CustomDateRange>({ startDate: null, endDate: null });
   const filterRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -395,6 +479,45 @@ const HomescreenWebUnified = ({ userName = 'Frank' }: HomescreenWebUnifiedProps)
     if (filterPanelOpen) document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [filterPanelOpen]);
+
+  const allTransactions = [...pendingTransactions, ...clearedTransactions];
+  const dateRangeDaysMap: Record<string, number> = {
+    'Last 24 Hours': 1,
+    'Last 3 days': 3,
+    'Last 7 days': 7,
+    'Last 14 days': 14,
+    'Last 30 days': 30,
+  };
+  const filteredTransactions = allTransactions.filter(t => {
+    if (selectedBenefits.length > 0 && !selectedBenefits.includes(t.benefitAccount)) return false;
+    if (selectedTypes.length > 0) {
+      const matches = selectedTypes.some(s =>
+        (s === 'Money In' && t.direction === 'MoneyIn') ||
+        (s === 'Money Out' && t.direction === 'MoneyOut')
+      );
+      if (!matches) return false;
+    }
+    if (selectedStatuses.length > 0 && !selectedStatuses.includes(t.type)) return false;
+    if (selectedDateRange !== null) {
+      const days = dateRangeDaysMap[selectedDateRange];
+      if (days !== undefined) {
+        const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+        if (new Date(t.date) < cutoff) return false;
+      }
+    } else if (customDateRange.startDate || customDateRange.endDate) {
+      const txDate = new Date(t.date);
+      if (customDateRange.startDate && txDate < customDateRange.startDate) return false;
+      if (customDateRange.endDate) {
+        const endOfDay = new Date(customDateRange.endDate);
+        endOfDay.setHours(23, 59, 59, 999);
+        if (txDate > endOfDay) return false;
+      }
+    }
+    return true;
+  });
+  const filteredPending = filteredTransactions.filter(t => t.type === 'Pending');
+  const filteredCleared = filteredTransactions.filter(t => t.type === 'Cleared');
+
   const notifTotal = 2;
 
   const navItems = locale === 'en' ? healthWalletNavItemsEn : healthWalletNavItemsEs;
@@ -415,7 +538,7 @@ const HomescreenWebUnified = ({ userName = 'Frank' }: HomescreenWebUnifiedProps)
       />
 
       {/* Main content */}
-      <main style={{ flex: 1, overflowY: 'auto', padding: 32, minWidth: 0 }}>
+      <main className="hide-scrollbar" style={{ flex: 1, overflowY: 'auto', padding: 32, minWidth: 0 }}>
 
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
@@ -542,12 +665,14 @@ const HomescreenWebUnified = ({ userName = 'Frank' }: HomescreenWebUnifiedProps)
                   selectedBenefits.length +
                   selectedTypes.length +
                   selectedStatuses.length +
-                  (selectedDateRange ? 1 : 0);
+                  (selectedDateRange ? 1 : 0) +
+                  (customDateRange.startDate ? 1 : 0);
                 const clearAll = () => {
                   setSelectedBenefits([]);
                   setSelectedTypes([]);
                   setSelectedStatuses([]);
                   setSelectedDateRange(null);
+                  setCustomDateRange({ startDate: null, endDate: null });
                 };
                 return (
                   <button
@@ -627,46 +752,68 @@ const HomescreenWebUnified = ({ userName = 'Frank' }: HomescreenWebUnifiedProps)
                   setSelectedStatuses={setSelectedStatuses}
                   selectedDateRange={selectedDateRange}
                   setSelectedDateRange={setSelectedDateRange}
+                  customDateRange={customDateRange}
+                  setCustomDateRange={setCustomDateRange}
                 />
               )}
             </div>
           </div>
 
           {/* Pending */}
-          <SectionLabel label="Pending" />
-          <div>
-            {pendingTransactions.map((t, i) => (
-              <WalletTransactionListItemWeb
-                key={`pending-${i}`}
-                merchantName={t.merchantName}
-                benefitAccount={t.benefitAccount}
-                transactionAmount={t.transactionAmount}
-                date={t.date}
-                type="Pending"
-                benefit={toBenefit(t.benefit)}
-                isMoneyOut={t.direction === 'MoneyOut'}
-                hasBottomDivider={i < pendingTransactions.length - 1}
-              />
-            ))}
-          </div>
+          {filteredPending.length > 0 && (
+            <>
+              <SectionLabel label="Pending" />
+              <div>
+                {filteredPending.map((t, i) => (
+                  <WalletTransactionListItemWeb
+                    key={`pending-${i}`}
+                    merchantName={t.merchantName}
+                    benefitAccount={t.benefitAccount}
+                    transactionAmount={t.transactionAmount}
+                    date={t.date}
+                    type="Pending"
+                    benefit={toBenefit(t.benefit)}
+                    isMoneyOut={t.direction === 'MoneyOut'}
+                    hasBottomDivider={i < filteredPending.length - 1}
+                  />
+                ))}
+              </div>
+            </>
+          )}
 
           {/* Cleared */}
-          <SectionLabel label="Cleared" />
-          <div>
-            {clearedTransactions.map((t, i) => (
-              <WalletTransactionListItemWeb
-                key={`cleared-${i}`}
-                merchantName={t.merchantName}
-                benefitAccount={t.benefitAccount}
-                transactionAmount={t.transactionAmount}
-                date={t.date}
-                type={t.direction}
-                benefit={toBenefit(t.benefit)}
-                isMoneyOut={t.direction === 'MoneyOut'}
-                hasBottomDivider={i < clearedTransactions.length - 1}
-              />
-            ))}
-          </div>
+          {filteredCleared.length > 0 && (
+            <>
+              <SectionLabel label="Cleared" />
+              <div>
+                {filteredCleared.map((t, i) => (
+                  <WalletTransactionListItemWeb
+                    key={`cleared-${i}`}
+                    merchantName={t.merchantName}
+                    benefitAccount={t.benefitAccount}
+                    transactionAmount={t.transactionAmount}
+                    date={t.date}
+                    type={t.direction}
+                    benefit={toBenefit(t.benefit)}
+                    isMoneyOut={t.direction === 'MoneyOut'}
+                    hasBottomDivider={i < filteredCleared.length - 1}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Empty state */}
+          {filteredTransactions.length === 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px 0' }}>
+              <p style={{ fontFamily: 'Roboto, sans-serif', fontSize: 20, fontWeight: 400, color: '#60758f', letterSpacing: -0.4, margin: '0 0 4px 0' }}>
+                Nothing... yet.
+              </p>
+              <p style={{ fontFamily: 'Roboto, sans-serif', fontSize: 15, color: '#b8c0ca', letterSpacing: -0.15, margin: 0, textAlign: 'center' }}>
+                No transaction matches your criteria.<br />Update filter and try again.
+              </p>
+            </div>
+          )}
 
         </div>
       </main>
