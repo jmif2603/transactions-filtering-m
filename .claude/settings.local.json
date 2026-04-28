@@ -30,7 +30,13 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(git -C /Users/jessiekarch/vscodeProjs/transaction-filtering-proto remote -v)",
+      "Bash(git -C /Users/jessiekarch/vscodeProjs/transaction-filtering-proto ls-remote --exit-code origin HEAD)",
+      "Bash(git -C /Users/jessiekarch/vscodeProjs/transactions-filtering-web remote -v)",
+      "Bash(git -C /Users/jessiekarch/vscodeProjs/transactions-filtering-web ls-remote --exit-code origin HEAD)",
+      "Bash(git -C /Users/jessiekarch/vscodeProjs/transactions-filtering-mobile remote -v)",
+      "Bash(git -C /Users/jessiekarch/vscodeProjs/transactions-filtering-mobile ls-remote --exit-code origin HEAD)"
     ]
   }
 }
