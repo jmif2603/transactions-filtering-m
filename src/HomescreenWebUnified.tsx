@@ -515,8 +515,18 @@ const HomescreenWebUnified = ({ userName = 'Frank' }: HomescreenWebUnifiedProps)
     }
     return true;
   });
-  const filteredPending = filteredTransactions.filter(t => t.type === 'Pending');
-  const filteredCleared = filteredTransactions.filter(t => t.type === 'Cleared');
+  const parseDate = (dateStr: string) => {
+    const months: Record<string, number> = {
+      Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
+      Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
+    };
+    const [mon, day, year] = dateStr.replace(',', '').split(' ');
+    return new Date(parseInt(year), months[mon], parseInt(day)).getTime();
+  };
+  const sortByDateDesc = (a: { date: string }, b: { date: string }) => parseDate(b.date) - parseDate(a.date);
+
+  const filteredPending = filteredTransactions.filter(t => t.type === 'Pending').sort(sortByDateDesc);
+  const filteredCleared = filteredTransactions.filter(t => t.type === 'Cleared').sort(sortByDateDesc);
 
   const notifTotal = 2;
 
