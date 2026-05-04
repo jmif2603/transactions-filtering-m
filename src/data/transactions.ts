@@ -63,7 +63,7 @@ export const clearedTransactions: Transaction[] = [
     benefit: 'RemoteWork',
   },
   {
-    merchantName: 'Metro BusPass 12/2022',
+    merchantName: 'Metro BusPass Monthly',
     benefitAccount: 'Transit',
     transactionAmount: '82.40',
     date: 'Apr 11, 2026',
@@ -536,7 +536,7 @@ export const pendingTransactions: Transaction[] = [
     benefit: 'DCFSA',
   },
   {
-    merchantName: 'Refund',
+    merchantName: 'Correction - Manual Refund',
     benefitAccount: 'LPFSA',
     transactionAmount: '50.00',
     date: 'Feb 07, 2025',
@@ -554,7 +554,7 @@ export const pendingTransactions: Transaction[] = [
     benefit: 'RemoteWork',
   },
   {
-    merchantName: 'Metro BusPass 01/2024',
+    merchantName: 'Tri-state Rail 30-day Pass',
     benefitAccount: 'Transit',
     transactionAmount: '81.70',
     date: 'Jan 11, 2025',
@@ -581,7 +581,7 @@ export const pendingTransactions: Transaction[] = [
     benefit: 'Parking',
   },
   {
-    merchantName: 'Steps Challenge 12/2023',
+    merchantName: 'Monthly Steps Challenge',
     benefitAccount: 'Rewards',
     transactionAmount: '20.00',
     date: 'Dec 19, 2026',
